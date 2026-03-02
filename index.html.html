@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="咖啡记录">
+    <meta name="theme-color" content="#21808d">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>手冲咖啡记录</title>
+    <style>
+        :root {
+            --color-white: rgba(255, 255, 255, 1);
+            --color-black: rgba(0, 0, 0, 1);
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-cream-100: rgba(255, 255, 253, 1);
+            --color-gray-200: rgba(245, 245, 245, 1);
+            --color-gray-300: rgba(167, 169, 169, 1);
+            --color-gray-400: rgba(119, 124, 124, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-brown-600: rgba(94, 82, 64, 1);
+            --color-charcoal-700: rgba(31, 33, 33, 1);
+            --color-charcoal-800: rgba(38, 40, 40, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-teal-300: rgba(50, 184, 198, 1);
+            --color-teal-400: rgba(45, 166, 178, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+            --color-teal-700: rgba(26, 104, 115, 1);
+            --color-teal-800: rgba(41, 150, 161, 1);
+            --color-brown-600-rgb: 94, 82, 64;
+            --color-teal-500-rgb: 33, 128, 141;
+            --color-slate-900-rgb: 19, 52, 59;
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-cream-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-primary-active: var(--color-teal-700);
+            --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
+            --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
+            --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+            --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+            --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-gray-400-rgb: 119, 124, 124;
+                --color-teal-300-rgb: 50, 184, 198;
+                --color-gray-300-rgb: 167, 169, 169;
+                --color-gray-200-rgb: 245, 245, 245;
+                --color-background: var(--color-charcoal-700);
+                --color-surface: var(--color-charcoal-800);
+                --color-text: var(--color-gray-200);
+                --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
+                --color-primary: var(--color-teal-300);
+                --color-primary-hover: var(--color-teal-400);
+                --color-primary-active: var(--color-teal-800);
+                --color-secondary: rgba(var(--color-gray-400-rgb), 0.15);
+                --color-secondary-hover: rgba(var(--color-gray-400-rgb), 0.25);
+                --color-border: rgba(var(--color-gray-400-rgb), 0.3);
+                --color-card-border: rgba(var(--color-gray-400-rgb), 0.2);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-base);
+            background: var(--color-background);
+            color: var(--color-text);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 24px;
+            color: var(--color-text);
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            font-size: 1rem;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--color-text);
+            background: var(--color-secondary);
+        }
+
+        .tab.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--color-text);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--color-surface);
+            color: var(--color-text);
+            font-family: var(--font-family-base);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: 2px solid var(--color-primary);
+            border-color: var(--color-primary);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .row .form-group {
+            flex: 1;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: var(--color-primary);
+            color: var(--color-cream-50);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+
+        button:hover {
+            background: var(--color-primary-hover);
+        }
+
+        button:active {
+            background: var(--color-primary-active);
+        }
+
+        button.secondary {
+            background: var(--color-secondary);
+            color: var(--color-text);
+        }
+
+        button.secondary:hover {
+            background: var(--color-secondary-hover);
+        }
+
+        .brew-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-card-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .brew-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+
+        .brew-card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .brew-card-date {
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .brew-detail {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .brew-detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brew-detail-label {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .brew-detail-value {
+            font-weight: 500;
+            color: var(--color-text);
+        }
+
+        .brew-flavor {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--color-border);
+        }
+
+        .filter-section {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: var(--color-surface);
+            border-radius: 12px;
+            border: 1px solid var(--color-card-border);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-row select {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--color-surface);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--color-card-border);
+        }
+
+        .compare-table th {
+            background: var(--color-secondary);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--color-text);
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .compare-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text);
+        }
+
+        .compare-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .compare-table tr:hover {
+            background: var(--color-secondary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-card-border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .stat-label {
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        .delete-btn {
+            background: transparent;
+            color: var(--color-text-secondary);
+            padding: 6px 12px;
+            font-size: 0.875rem;
+        }
+
+        .delete-btn:hover {
+            background: rgba(255, 84, 89, 0.1);
+            color: #ff5459;
+        }
+
+        @media (max-width: 768px) {
+            .row {
+                flex-direction: column;
+            }
+
+            .brew-detail {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-row {
+                flex-direction: column;
+            }
+
+            .filter-row select {
+                width: 100%;
+            }
+
+            .compare-table {
+                font-size: 0.875rem;
+            }
+
+            .compare-table th, .compare-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>☕ 手冲咖啡记录</h1>
+
+    <div class="tab-container">
+        <button class="tab active" data-tab="add">添加记录</button>
+        <button class="tab" data-tab="history">历史记录</button>
+        <button class="tab" data-tab="compare">对比分析</button>
+    </div>
+
+    <div id="add-tab" class="tab-content active">
+        <form id="brew-form">
+            <div class="form-group">
+                <label for="bean-name">咖啡豆名称</label>
+                <input type="text" id="bean-name" required placeholder="例如：埃塞俄比亚耶加雪菲">
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="bean-weight">豆量 (g)</label>
+                    <input type="number" id="bean-weight" step="0.1" required placeholder="15">
+                </div>
+                <div class="form-group">
+                    <label for="water-weight">水量 (g)</label>
+                    <input type="number" id="water-weight" step="0.1" required placeholder="250">
+                </div>
+                <div class="form-group">
+                    <label for="ratio">粉水比</label>
+                    <input type="text" id="ratio" readonly placeholder="自动计算">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="brew-method">冲煮方式</label>
+                    <select id="brew-method" required>
+                        <option value="">选择冲煮方式</option>
+                        <option value="V60">V60</option>
+                        <option value="Chemex">Chemex</option>
+                        <option value="Kalita Wave">Kalita Wave</option>
+                        <option value="爱乐压">爱乐压</option>
+                        <option value="法压壶">法压壶</option>
+                        <option value="聪明杯">聪明杯</option>
+                        <option value="其他">其他</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="grind-size">研磨度</label>
+                    <select id="grind-size" required>
+                        <option value="">选择研磨度</option>
+                        <option value="极细">极细</option>
+                        <option value="细">细</option>
+                        <option value="中细">中细</option>
+                        <option value="中">中</option>
+                        <option value="中粗">中粗</option>
+                        <option value="粗">粗</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label for="water-temp">水温 (°C)</label>
+                    <input type="number" id="water-temp" required placeholder="92">
+                </div>
+                <div class="form-group">
+                    <label for="brew-time">冲煮时间 (分:秒)</label>
+                    <input type="text" id="brew-time" placeholder="2:30" pattern="\d{1,2}:\d{2}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="equipment">使用器具</label>
+                <input type="text" id="equipment" placeholder="例如：Hario V60 02, Comandante磨豆机">
+            </div>
+
+            <div class="form-group">
+                <label for="flavor">风味描述</label>
+                <textarea id="flavor" placeholder="描述这杯咖啡的风味、口感、酸度、甜度、body等"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="rating">评分 (1-10)</label>
+                <input type="number" id="rating" min="1" max="10" step="0.5" placeholder="8">
+            </div>
+
+            <button type="submit">保存记录</button>
+        </form>
+    </div>
+
+    <div id="history-tab" class="tab-content">
+        <div class="stats-grid" id="stats-grid"></div>
+        <div id="brew-list"></div>
+    </div>
+
+    <div id="compare-tab" class="tab-content">
+        <div class="filter-section">
+            <h3 style="margin-bottom: 16px;">筛选条件</h3>
+            <div class="filter-row">
+                <select id="filter-bean">
+                    <option value="">所有咖啡豆</option>
+                </select>
+                <select id="filter-method">
+                    <option value="">所有冲煮方式</option>
+                </select>
+                <select id="filter-grind">
+                    <option value="">所有研磨度</option>
+                </select>
+            </div>
+        </div>
+        <div id="compare-results"></div>
+    </div>
+
+    <script>
+        let brews = JSON.parse(localStorage.getItem('coffeeBrews') || '[]');
+
+        const beanWeightInput = document.getElementById('bean-weight');
+        const waterWeightInput = document.getElementById('water-weight');
+        const ratioInput = document.getElementById('ratio');
+
+        function calculateRatio() {
+            const bean = parseFloat(beanWeightInput.value);
+            const water = parseFloat(waterWeightInput.value);
+            if (bean && water) {
+                const ratio = (water / bean).toFixed(1);
+                ratioInput.value = `1:${ratio}`;
+            } else {
+                ratioInput.value = '';
+            }
+        }
+
+        beanWeightInput.addEventListener('input', calculateRatio);
+        waterWeightInput.addEventListener('input', calculateRatio);
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+                
+                if (tab.dataset.tab === 'history') {
+                    renderHistory();
+                } else if (tab.dataset.tab === 'compare') {
+                    renderCompare();
+                }
+            });
+        });
+
+        document.getElementById('brew-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const brew = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                beanName: document.getElementById('bean-name').value,
+                beanWeight: parseFloat(document.getElementById('bean-weight').value),
+                waterWeight: parseFloat(document.getElementById('water-weight').value),
+                ratio: document.getElementById('ratio').value,
+                brewMethod: document.getElementById('brew-method').value,
+                grindSize: document.getElementById('grind-size').value,
+                waterTemp: parseFloat(document.getElementById('water-temp').value),
+                brewTime: document.getElementById('brew-time').value,
+                equipment: document.getElementById('equipment').value,
+                flavor: document.getElementById('flavor').value,
+                rating: parseFloat(document.getElementById('rating').value) || null
+            };
+
+            brews.unshift(brew);
+            localStorage.setItem('coffeeBrews', JSON.stringify(brews));
+            
+            document.getElementById('brew-form').reset();
+            alert('记录已保存！');
+        });
+
+        function renderHistory() {
+            const statsGrid = document.getElementById('stats-grid');
+            const brewList = document.getElementById('brew-list');
+
+            if (brews.length === 0) {
+                statsGrid.innerHTML = '';
+                brewList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">☕</div>
+                        <p>还没有冲煮记录，开始添加你的第一杯咖啡吧！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const totalBrews = brews.length;
+            const avgRating = brews.filter(b => b.rating).reduce((sum, b) => sum + b.rating, 0) / brews.filter(b => b.rating).length;
+            const favoriteBean = getMostFrequent(brews.map(b => b.beanName));
+            const favoriteMethod = getMostFrequent(brews.map(b => b.brewMethod));
+
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">总冲煮次数</div>
+                    <div class="stat-value">${totalBrews}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">平均评分</div>
+                    <div class="stat-value">${avgRating ? avgRating.toFixed(1) : 'N/A'}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">最常用豆子</div>
+                    <div class="stat-value" style="font-size: 1.1rem;">${favoriteBean}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">最常用方式</div>
+                    <div class="stat-value" style="font-size: 1.1rem;">${favoriteMethod}</div>
+                </div>
+            `;
+
+            brewList.innerHTML = brews.map(brew => `
+                <div class="brew-card">
+                    <div class="brew-card-header">
+                        <div>
+                            <div class="brew-card-title">${brew.beanName}</div>
+                            <div class="brew-card-date">${new Date(brew.date).toLocaleString('zh-CN')}</div>
+                        </div>
+                        <button class="delete-btn" onclick="deleteBrew(${brew.id})">删除</button>
+                    </div>
+                    <div class="brew-detail">
+                        <div class="brew-detail-item">
+                            <div class="brew-detail-label">豆量</div>
+                            <div class="brew-detail-value">${brew.beanWeight}g</div>
+                        </div>
+                        <div class="brew-detail-item">
+                            <div class="brew-detail-label">水量</div>
+                            <div class="brew-detail-value">${brew.waterWeight}g</div>
+                        </div>
+                        <div class="brew-detail-item">
+                            <div class="brew-detail-label">粉水比</div>
+                            <div class="brew-detail-value">${brew.ratio}</div>
+                        </div>
+                        <div class="brew-detail-item">
+                            <div class="brew-detail-label">冲煮方式</div>
+                            <div class="brew-detail-value">${brew.brewMethod}</div>
+                        </div>
+                        <div class="brew-detail-item">
+                            <div class="brew-detail-label">研磨度</div>
+                            <div class="brew-detail-value">${brew.grindSize}</div>
+                        </div>
+                        <div class="brew-detail-item">
+                            <div class="brew-detail-label">水温</div>
+                            <div class="brew-detail-value">${brew.waterTemp}°C</div>
+                        </div>
+                        <div class="brew-detail-item">
+                            <div class="brew-detail-label">时间</div>
+                            <div class="brew-detail-value">${brew.brewTime || 'N/A'}</div>
+                        </div>
+                        <div class="brew-detail-item">
+                            <div class="brew-detail-label">评分</div>
+                            <div class="brew-detail-value">${brew.rating ? brew.rating + '/10' : 'N/A'}</div>
+                        </div>
+                    </div>
+                    ${brew.equipment ? `<div class="brew-detail-item" style="margin-top: 12px;"><div class="brew-detail-label">器具</div><div class="brew-detail-value">${brew.equipment}</div></div>` : ''}
+                    ${brew.flavor ? `<div class="brew-flavor"><div class="brew-detail-label">风味</div><div class="brew-detail-value">${brew.flavor}</div></div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function renderCompare() {
+            const filterBean = document.getElementById('filter-bean');
+            const filterMethod = document.getElementById('filter-method');
+            const filterGrind = document.getElementById('filter-grind');
+            const compareResults = document.getElementById('compare-results');
+
+            const uniqueBeans = [...new Set(brews.map(b => b.beanName))];
+            const uniqueMethods = [...new Set(brews.map(b => b.brewMethod))];
+            const uniqueGrinds = [...new Set(brews.map(b => b.grindSize))];
+
+            filterBean.innerHTML = '<option value="">所有咖啡豆</option>' + uniqueBeans.map(b => `<option value="${b}">${b}</option>`).join('');
+            filterMethod.innerHTML = '<option value="">所有冲煮方式</option>' + uniqueMethods.map(m => `<option value="${m}">${m}</option>`).join('');
+            filterGrind.innerHTML = '<option value="">所有研磨度</option>' + uniqueGrinds.map(g => `<option value="${g}">${g}</option>`).join('');
+
+            function updateCompare() {
+                let filtered = brews;
+                if (filterBean.value) filtered = filtered.filter(b => b.beanName === filterBean.value);
+                if (filterMethod.value) filtered = filtered.filter(b => b.brewMethod === filterMethod.value);
+                if (filterGrind.value) filtered = filtered.filter(b => b.grindSize === filterGrind.value);
+
+                if (filtered.length === 0) {
+                    compareResults.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔍</div><p>没有符合条件的记录</p></div>';
+                    return;
+                }
+
+                const sorted = filtered.filter(b => b.rating).sort((a, b) => b.rating - a.rating);
+
+                compareResults.innerHTML = `
+                    <table class="compare-table">
+                        <thead>
+                            <tr>
+                                <th>评分</th>
+                                <th>咖啡豆</th>
+                                <th>冲煮方式</th>
+                                <th>研磨度</th>
+                                <th>粉水比</th>
+                                <th>水温</th>
+                                <th>日期</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sorted.map(brew => `
+                                <tr>
+                                    <td><strong>${brew.rating}/10</strong></td>
+                                    <td>${brew.beanName}</td>
+                                    <td>${brew.brewMethod}</td>
+                                    <td>${brew.grindSize}</td>
+                                    <td>${brew.ratio}</td>
+                                    <td>${brew.waterTemp}°C</td>
+                                    <td>${new Date(brew.date).toLocaleDateString('zh-CN')}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            }
+
+            filterBean.addEventListener('change', updateCompare);
+            filterMethod.addEventListener('change', updateCompare);
+            filterGrind.addEventListener('change', updateCompare);
+
+            updateCompare();
+        }
+
+        function getMostFrequent(arr) {
+            if (arr.length === 0) return 'N/A';
+            const counts = {};
+            arr.forEach(item => counts[item] = (counts[item] || 0) + 1);
+            return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+        }
+
+        function deleteBrew(id) {
+            if (confirm('确定要删除这条记录吗？')) {
+                brews = brews.filter(b => b.id !== id);
+                localStorage.setItem('coffeeBrews', JSON.stringify(brews));
+                renderHistory();
+            }
+        }
+
+        renderHistory();
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(() => {
+                    console.log('Service Worker registration failed');
+                });
+            });
+        }
+    </script>
+</body>
+</html>

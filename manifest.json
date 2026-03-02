@@ -1,0 +1,22 @@
+{
+  "name": "手冲咖啡记录",
+  "short_name": "咖啡记录",
+  "description": "记录每次手冲咖啡的豆子、粉水比、器具和风味",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fcfcf9",
+  "theme_color": "#21808d",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
